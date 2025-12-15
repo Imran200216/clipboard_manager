@@ -18,4 +18,12 @@ class AppColorThemes {
   static const Color selectedSideBarItemsTextColor = Color(0xFF195DE6);
 
   static const Color transparentColor = Colors.transparent;
+
+  static const Color gridAndListViewToggleSelectedBgColor = Color(0xFF2A3446);
+
+  static const Color gridOrListReorderableIconContainerBgColor = Color(
+    0xFF202E45,
+  );
+
+  static const Color blackColor = Colors.black;
 }

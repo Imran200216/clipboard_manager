@@ -71,6 +71,7 @@ class HomeScreen extends StatelessWidget {
                 Expanded(
                   child: Container(
                     color: AppColorThemes.secondaryColor,
+                    alignment: Alignment.topLeft, // 🔥 IMPORTANT
                     child: _screens[selectedIndex],
                   ),
                 ),
