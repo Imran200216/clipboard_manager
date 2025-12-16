@@ -50,6 +50,11 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     title: const Text("Clip Manager"),
+                    titleTextStyle: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: AppColorThemes.whiteColor,
+                    ),
                   )
                 : null,
 

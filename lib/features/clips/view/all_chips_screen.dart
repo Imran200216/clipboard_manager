@@ -4,7 +4,6 @@ import 'package:clipboard_manager/core/themes/app_color_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:clipboard_manager/core/utils/utils.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:reorderables/reorderables.dart';
 
 class AllClipsScreen extends StatefulWidget {
   const AllClipsScreen({super.key});
@@ -14,14 +13,12 @@ class AllClipsScreen extends StatefulWidget {
 }
 
 class _AllClipsScreenState extends State<AllClipsScreen> {
-  // Controller
   final TextEditingController searchChipsOrTagsController =
       TextEditingController();
 
-  // Grid Flag
   bool isGridSelected = true;
 
-  List<int> clips = List.generate(8, (index) => index);
+  final List<int> clips = List.generate(8, (index) => index);
 
   @override
   void dispose() {
@@ -37,175 +34,110 @@ class _AllClipsScreenState extends State<AllClipsScreen> {
     final isDesktop = AppResponsiveUtils.isDesktop(context);
 
     return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
-          spacing: 30,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// ---------- HEADER ----------
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Title and SubTitle
                 Expanded(
-                  flex: 1,
                   child: Column(
-                    spacing: 4,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
+                    children: const [
                       KText(
-                        maxLines: 2,
-                        overflow: TextOverflow.visible,
-                        softWrap: true,
-                        textAlign: TextAlign.start,
                         text: "Clip Manager",
-                        fontSize: isDesktop
-                            ? 20
-                            : isTablet
-                            ? 18
-                            : 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.w500,
                         color: AppColorThemes.whiteColor,
                       ),
-
-                      // SubTitle
+                      SizedBox(height: 4),
                       KText(
-                        maxLines: 2,
-                        overflow: TextOverflow.visible,
-                        softWrap: true,
-                        textAlign: TextAlign.start,
                         text: "Most recent items captured",
-                        fontSize: isDesktop
-                            ? 15
-                            : isTablet
-                            ? 13
-                            : 11,
-                        fontWeight: FontWeight.w300,
+                        fontSize: 14,
                         color: AppColorThemes.dashboardUnSelectedColor,
                       ),
                     ],
                   ),
                 ),
-
-                const Spacer(flex: 1),
-
-                // Search Bar
                 Expanded(
-                  flex: 1,
                   child: KTextFormField(
                     prefixIcon: Icon(
                       Icons.search,
                       color: AppColorThemes.dashboardUnSelectedColor,
-                      weight: 200,
                     ),
                     controller: searchChipsOrTagsController,
-                    hintText: "Search chips or tags...",
+                    hintText: "Search clips or tags...",
                   ),
                 ),
               ],
             ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: AppColorThemes.secondaryColor,
-                    border: Border.all(
-                      color: AppColorThemes.dashboardUnSelectedColor
-                          .withOpacity(0.2),
-                      width: 1,
+            const SizedBox(height: 24),
+
+            /// ---------- GRID / LIST TOGGLE ----------
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColorThemes.secondaryColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _viewToggleButton(
+                      isSelected: isGridSelected,
+                      iconPath: AppAssetsConstants.grid,
+                      onTap: () => setState(() => isGridSelected = true),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 6,
-                    children: [
-                      // Grid button
-                      _viewToggleButton(
-                        isSelected: isGridSelected,
-                        iconPath: AppAssetsConstants.grid,
-                        iconSize: isDesktop
-                            ? 22
-                            : isTablet
-                            ? 20
-                            : 18,
-                        onTap: () {
-                          if (!isGridSelected) {
-                            setState(() {
-                              isGridSelected = true;
-                            });
-                          }
-                        },
-                      ),
-
-                      // List button
-                      _viewToggleButton(
-                        isSelected: !isGridSelected,
-                        iconPath: AppAssetsConstants.list,
-                        iconSize: isDesktop
-                            ? 22
-                            : isTablet
-                            ? 20
-                            : 18,
-                        onTap: () {
-                          if (isGridSelected) {
-                            setState(() {
-                              isGridSelected = false;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
+                    _viewToggleButton(
+                      isSelected: !isGridSelected,
+                      iconPath: AppAssetsConstants.list,
+                      onTap: () => setState(() => isGridSelected = false),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
 
-            // Divider
+            const SizedBox(height: 20),
+
             Divider(
-              color: AppColorThemes.dashboardUnSelectedColor,
-              height: 0.2,
-              thickness: 0.4,
+              color: AppColorThemes.dashboardUnSelectedColor.withOpacity(0.4),
             ),
 
-            if (isMobile)
-              ReorderableListView.builder(
+            const SizedBox(height: 20),
+
+            /// ---------- CONTENT ----------
+            if (!isGridSelected || isMobile)
+              ListView.builder(
                 itemCount: clips.length,
-                onReorder: (oldIndex, newIndex) {
-                  if (newIndex > oldIndex) newIndex -= 1;
-                  final item = clips.removeAt(oldIndex);
-                  clips.insert(newIndex, item);
-                  setState(() {});
-                },
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   return Padding(
-                    key: ValueKey(clips[index]),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: clipCard(isDesktop: false, isTablet: false),
                   );
                 },
               )
-            else if (isTablet || isDesktop)
-              ReorderableWrap(
-                spacing: 16,
-                runSpacing: 16,
-                onReorder: (oldIndex, newIndex) {
-                  final item = clips.removeAt(oldIndex);
-                  clips.insert(newIndex, item);
-                  setState(() {});
-                },
-                children: clips.map((e) {
+            else
+              GridView.builder(
+                itemCount: clips.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isDesktop ? 4 : 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder: (context, index) {
                   return clipCard(isDesktop: isDesktop, isTablet: isTablet);
-                }).toList(),
+                },
               ),
           ],
         ),
@@ -213,96 +145,64 @@ class _AllClipsScreenState extends State<AllClipsScreen> {
     );
   }
 
+  /// ---------- TOGGLE BUTTON ----------
   Widget _viewToggleButton({
     required bool isSelected,
     required VoidCallback onTap,
     required String iconPath,
-    required double iconSize,
   }) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: isSelected
+              ? AppColorThemes.gridAndListViewToggleSelectedBgColor
+              : Colors.transparent,
+        ),
+        child: Center(
+          child: SvgPicture.asset(
+            iconPath,
+            height: 20,
             color: isSelected
-                ? AppColorThemes.gridAndListViewToggleSelectedBgColor
-                : Colors.transparent,
-          ),
-          child: Center(
-            child: SvgPicture.asset(
-              iconPath,
-              height: iconSize,
-              color: isSelected
-                  ? AppColorThemes.whiteColor
-                  : AppColorThemes.dashboardUnSelectedColor,
-            ),
+                ? AppColorThemes.whiteColor
+                : AppColorThemes.dashboardUnSelectedColor,
           ),
         ),
       ),
     );
   }
 
+  /// ---------- CLIP CARD ----------
   Widget clipCard({required bool isDesktop, required bool isTablet}) {
     return Container(
-      key: UniqueKey(),
-      // 🔴 REQUIRED for reorder
       height: 300,
-      width: 300,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: AppColorThemes.sideBarBgColor,
       ),
       child: Column(
-        spacing: 12,
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // ---- TITLE ROW ----
           Row(
-            spacing: 12,
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color:
-                      AppColorThemes.gridOrListReorderableIconContainerBgColor,
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    AppAssetsConstants.reorderable,
-                    height: isDesktop
-                        ? 20
-                        : isTablet
-                        ? 18
-                        : 16,
-                    color: AppColorThemes.primaryColor,
-                  ),
-                ),
-              ),
-              const Expanded(
-                child: KText(
-                  text: "Javascript",
-                  color: AppColorThemes.dashboardUnSelectedColor,
-                ),
+            children: const [
+              KText(
+                text: "Javascript",
+                color: AppColorThemes.dashboardUnSelectedColor,
               ),
             ],
           ),
-
-          // ---- CONTENT ----
+          const SizedBox(height: 12),
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
                 color: AppColorThemes.blackColor,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: const KText(
                 text: "Hi this is the first javascript theory should be taught",
@@ -310,8 +210,7 @@ class _AllClipsScreenState extends State<AllClipsScreen> {
               ),
             ),
           ),
-
-          // ---- FOOTER ----
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
